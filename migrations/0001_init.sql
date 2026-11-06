@@ -25,6 +25,8 @@ CREATE TABLE studios (
   change_notice_hours   INTEGER NOT NULL DEFAULT 24,   -- students can cancel/move up to this many hours before
   booking_horizon_days  INTEGER NOT NULL DEFAULT 28,
   booking_notice_hours  INTEGER NOT NULL DEFAULT 12,  -- earliest a student can book ahead
+  student_cancel_credit INTEGER NOT NULL DEFAULT 1,   -- on-time student cancellation earns a make-up credit
+  makeup_expiry_days    INTEGER,                      -- null = credits never expire
   ical_url              TEXT,                          -- phase 2: Google Calendar busy times
   studio_address        TEXT,                          -- where physical classes happen
   created_at            TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
@@ -67,7 +69,9 @@ CREATE TABLE learner_rules (
   fee_minor           INTEGER NOT NULL DEFAULT 0,
   fee_basis           TEXT NOT NULL DEFAULT 'per_class' CHECK (fee_basis IN ('per_class','per_30min')),
   group_eligible      INTEGER NOT NULL DEFAULT 0,
-  can_self_book       INTEGER NOT NULL DEFAULT 1,
+  can_reschedule      INTEGER NOT NULL DEFAULT 1,    -- may move classes Aparna scheduled
+  can_book_extra      INTEGER NOT NULL DEFAULT 1,    -- may book extra classes (charged as normal)
+  can_book_makeup     INTEGER NOT NULL DEFAULT 1,    -- may redeem make-up credits
   allowed_modes       TEXT NOT NULL DEFAULT 'physical,virtual',  -- which class modes this learner may book
   default_mode        TEXT NOT NULL DEFAULT 'physical' CHECK (default_mode IN ('physical','virtual')),
   updated_at          TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
@@ -126,6 +130,10 @@ CREATE TABLE bookings (
   starts_at      TEXT NOT NULL,
   ends_at        TEXT NOT NULL,
   minutes        INTEGER NOT NULL,
+  kind           TEXT NOT NULL DEFAULT 'regular' CHECK (kind IN ('regular','extra','makeup')),
+  series_id      TEXT REFERENCES class_series(id),   -- set when generated from a recurring slot
+  moved_from     TEXT,                 -- original start time if a student or teacher moved it
+  makeup_credit_id TEXT,               -- the credit this make-up class used
   mode           TEXT NOT NULL DEFAULT 'physical' CHECK (mode IN ('physical','virtual')),
   location       TEXT,                 -- physical: address shown to the student
   room_id        TEXT REFERENCES meeting_rooms(id),  -- virtual: which room/provider was used
@@ -139,6 +147,38 @@ CREATE TABLE bookings (
 );
 CREATE INDEX bookings_studio_time ON bookings(studio_id, starts_at);
 CREATE INDEX bookings_learner ON bookings(learner_id, starts_at);
+
+-- Aparna's timetable: recurring classes she schedules for each learner.
+-- Tempo generates individual bookings from these a few weeks ahead.
+CREATE TABLE class_series (
+  id            TEXT PRIMARY KEY,
+  studio_id     TEXT NOT NULL REFERENCES studios(id),
+  learner_id    TEXT NOT NULL REFERENCES learners(id),
+  weekday       INTEGER NOT NULL CHECK (weekday BETWEEN 0 AND 6),
+  start_min     INTEGER NOT NULL,      -- local minutes after midnight, multiple of 30
+  minutes       INTEGER NOT NULL,      -- multiple of 30
+  mode          TEXT NOT NULL DEFAULT 'physical' CHECK (mode IN ('physical','virtual')),
+  room_id       TEXT,
+  starts_on     TEXT NOT NULL,         -- YYYY-MM-DD local
+  ends_on       TEXT,                  -- null = until stopped (e.g. end of term)
+  generated_to  TEXT,                  -- last date bookings were generated for
+  active        INTEGER NOT NULL DEFAULT 1,
+  created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+
+-- Make-up credits: issued when Aparna cancels, or when a student cancels within policy.
+CREATE TABLE makeup_credits (
+  id             TEXT PRIMARY KEY,
+  studio_id      TEXT NOT NULL REFERENCES studios(id),
+  learner_id     TEXT NOT NULL REFERENCES learners(id),
+  source_booking TEXT,                 -- the cancelled class
+  reason         TEXT,
+  expires_on     TEXT,                 -- null = never
+  used_booking   TEXT,                 -- the make-up class that used it
+  status         TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','used','expired','void')),
+  created_at     TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+CREATE INDEX makeup_learner ON makeup_credits(learner_id, status);
 
 CREATE TABLE booking_blocks (
   studio_id    TEXT NOT NULL,
