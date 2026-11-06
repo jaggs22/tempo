@@ -11,9 +11,11 @@ run_worker_first = ["/api/*"]
 [[d1_databases]]
 binding = "DB"
 database_name = "tempo"
-database_id = "REPLACE_WITH_YOUR_D1_ID"   # printed by: npx wrangler d1 create tempo
+database_id = "a9ccebca-c80f-478a-bfa0-666bed26dc21"
 migrations_dir = "migrations"
 
 [vars]
 DEV_MODE = "0"
+VAPID_SUBJECT = "https://tempo.jagannadh-rao22.workers.dev"
+# GOOGLE_CLIENT_ID is public and lives here; GOOGLE_CLIENT_SECRET is a Worker secret set by the deploy workflow.
 # TEACHER_EMAILS = "teacher@gmail.com"   # optional allow-list; empty = any Google account can create a studio

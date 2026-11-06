@@ -1,5 +1,5 @@
 // Shared helpers: HTTP, ids, hashing, sessions, notifications.
-import { b64u, sendPush } from './push.js';
+import { b64u, sendPush, generateVapidKeys } from './push.js';
 
 export class HttpError extends Error {
   constructor(status, message, extra) { super(message); this.status = status; this.extra = extra; }
@@ -100,14 +100,28 @@ export async function destroySession(env, req) {
 }
 
 // ---------- notifications ----------
+/** VAPID keys: from Worker secrets if set, otherwise generated once and kept in D1. */
+let vapidCache = null;
+export async function getVapid(env) {
+  if (env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY) return { publicKey: env.VAPID_PUBLIC_KEY, privateKey: env.VAPID_PRIVATE_KEY };
+  if (vapidCache) return vapidCache;
+  let row = await env.DB.prepare("SELECT value FROM app_config WHERE key = 'vapid'").first();
+  if (!row) {
+    const k = await generateVapidKeys();
+    await env.DB.prepare("INSERT OR IGNORE INTO app_config (key, value) VALUES ('vapid', ?)").bind(JSON.stringify(k)).run();
+    row = await env.DB.prepare("SELECT value FROM app_config WHERE key = 'vapid'").first();
+  }
+  vapidCache = JSON.parse(row.value);
+  return vapidCache;
+}
+
 /** In-app notification for each user, plus Web Push to every device they enabled. */
 export async function notify(env, ctx, studioId, userIds, { title, body, url: link }) {
   const ids = [...new Set(userIds.filter(Boolean))];
   if (!ids.length) return;
   await env.DB.batch(ids.map((u) => env.DB.prepare('INSERT INTO notifications (id, studio_id, user_id, title, body, url) VALUES (?,?,?,?,?,?)')
     .bind(uid('n'), studioId, u, title, body || null, link || null)));
-  if (!env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY) return;
-  const vapid = { publicKey: env.VAPID_PUBLIC_KEY, privateKey: env.VAPID_PRIVATE_KEY, subject: env.VAPID_SUBJECT || 'mailto:admin@example.com' };
+  const vapid = { ...(await getVapid(env)), subject: env.VAPID_SUBJECT || 'https://tempo.app' };
   const subs = (await env.DB.prepare(`SELECT * FROM push_subscriptions WHERE user_id IN (${ids.map(() => '?').join(',')})`).bind(...ids).all()).results;
   const work = Promise.all(subs.map(async (s) => {
     try {

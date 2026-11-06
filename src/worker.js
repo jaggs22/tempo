@@ -1,6 +1,6 @@
 // Tempo API (Cloudflare Worker). Static app files are served from /public by Workers Assets.
 import { json, fail, HttpError, uid, token, sha256, normName, cleanName, nowIso, str, int, oneOf, url as urlField, currency, toMinor,
-  createSession, getUser, destroySession, notify } from './lib.js';
+  createSession, getUser, destroySession, notify, getVapid } from './lib.js';
 import { BLOCK, freeStarts, weekCount, getRules, makeBooking, bookingStatements, isConflict, generateSeries, settle, balances, blocksFor, resolveRoom, feeFor } from './schedule.js';
 import { localToUtc, localDate, localMinutes, weekdayOf, addDays, isDate, iso } from './time.js';
 
@@ -88,7 +88,7 @@ on('GET', '/api/me', async (c) => {
   const studios = (await c.env.DB.prepare(`SELECT s.id, s.name, s.slug, s.join_code, m.role, m.status, m.id membership_id, m.username, m.is_shared
       FROM memberships m JOIN studios s ON s.id = m.studio_id WHERE m.user_id = ? AND m.status <> 'removed' ORDER BY m.created_at`).bind(c.user.id).all()).results;
   const unread = (await c.env.DB.prepare('SELECT COUNT(*) n FROM notifications WHERE user_id = ? AND read_at IS NULL').bind(c.user.id).first()).n;
-  return json({ user: { id: c.user.id, kind: c.user.kind, name: c.user.display_name, email: c.user.email }, studios, unread, vapid: c.env.VAPID_PUBLIC_KEY || null });
+  return json({ user: { id: c.user.id, kind: c.user.kind, name: c.user.display_name, email: c.user.email }, studios, unread, vapid: (await getVapid(c.env)).publicKey });
 });
 on('POST', '/api/logout', async (c) => json({ ok: true }, 200, { 'set-cookie': await destroySession(c.env, c.req) }));
 
