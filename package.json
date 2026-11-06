@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "node test/push.test.mjs"
+    "dev": "wrangler dev",
+    "db:local": "wrangler d1 migrations apply tempo --local",
+    "db:remote": "wrangler d1 migrations apply tempo --remote",
+    "deploy": "wrangler deploy",
+    "test": "node test/push.test.mjs",
+    "test:flow": "node test/flow.test.mjs",
+    "vapid": "node -e \"import('./src/push.js').then(async m=>console.log(await m.generateVapidKeys()))\""
   },
   "repository": {
     "type": "git",

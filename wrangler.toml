@@ -1,0 +1,19 @@
+name = "tempo"
+main = "src/worker.js"
+compatibility_date = "2026-10-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tempo"
+database_id = "REPLACE_WITH_YOUR_D1_ID"   # printed by: npx wrangler d1 create tempo
+migrations_dir = "migrations"
+
+[vars]
+DEV_MODE = "0"
+# TEACHER_EMAILS = "teacher@gmail.com"   # optional allow-list; empty = any Google account can create a studio
