@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#f4eee3"/>
+  <defs>
+    <path id="gourd" d="M241 330 C241 384 150 402 148 474 C146 538 198 568 256 568 C314 568 366 538 364 474 C362 402 271 384 271 330 Z"/>
+    <clipPath id="gc"><use href="#gourd"/></clipPath>
+  </defs>
+  <g transform="translate(262 252) rotate(-24) scale(.8) translate(-256 -300)">
+    <!-- side pegs -->
+    <rect x="200" y="66" width="44" height="9" rx="4.5" fill="#2a1d17"/><circle cx="198" cy="70.5" r="10" fill="#2a1d17"/>
+    <rect x="268" y="66" width="44" height="9" rx="4.5" fill="#2a1d17"/><circle cx="314" cy="70.5" r="10" fill="#2a1d17"/>
+    <!-- neck -->
+    <path d="M240 46 Q240 30 256 30 Q272 30 272 46 L273 340 L239 340 Z" fill="#9c4421"/>
+    <path d="M262 40 L264 336 L273 340 L272 46 Q272 34 264 31 Z" fill="#7d3317"/>
+    <!-- front pegs -->
+    <circle cx="256" cy="50" r="7.5" fill="#2a1d17"/><circle cx="256" cy="92" r="7.5" fill="#2a1d17"/>
+    <!-- bands -->
+    <rect x="239.5" y="118" width="33" height="6" fill="#e2a64f"/><rect x="239.5" y="130" width="33" height="3.5" fill="#e2a64f"/>
+    <!-- gourd -->
+    <use href="#gourd" fill="#a8471f"/>
+    <g clip-path="url(#gc)"><ellipse cx="300" cy="500" rx="120" ry="110" fill="#87361a"/><use href="#gourd" fill="none" stroke="#f6e7cf" stroke-width="12"/></g>
+    <!-- collar -->
+    <path d="M236 326 Q256 318 276 326 L278 340 Q256 333 234 340 Z" fill="#f6e7cf"/>
+    <!-- bridge -->
+    <rect x="232" y="500" width="48" height="13" rx="2.5" fill="#f6e7cf"/>
+    <!-- strings -->
+    <g stroke="#f6e7cf" stroke-width="2" stroke-linecap="round" opacity=".9">
+      <line x1="249" y1="56" x2="243" y2="500"/><line x1="254" y1="56" x2="252" y2="500"/>
+      <line x1="258" y1="56" x2="260" y2="500"/><line x1="263" y1="56" x2="269" y2="500"/>
+      <line x1="243" y1="513" x2="251" y2="566"/><line x1="252" y1="513" x2="254" y2="566"/>
+      <line x1="260" y1="513" x2="258" y2="566"/><line x1="269" y1="513" x2="261" y2="566"/>
+    </g>
+  </g>
+</svg>

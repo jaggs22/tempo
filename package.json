@@ -1,0 +1,24 @@
+{
+  "name": "tempo",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "node test/push.test.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaggs22/tempo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jaggs22/tempo/issues"
+  },
+  "homepage": "https://github.com/jaggs22/tempo#readme",
+  "devDependencies": {
+    "wrangler": "^4.158.0"
+  },
+  "type": "module",
+  "private": true
+}
