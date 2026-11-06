@@ -87,7 +87,7 @@ CREATE TABLE meeting_rooms (
   studio_id     TEXT NOT NULL REFERENCES studios(id),
   provider      TEXT NOT NULL CHECK (provider IN ('zoom','google_meet','teams','fixed_link')),
   kind          TEXT NOT NULL CHECK (kind IN ('generated','fixed')),
-  label         TEXT NOT NULL,         -- e.g. "Zoom (auto)", "My Meet room", "SuSwara classroom"
+  label         TEXT NOT NULL,         -- e.g. "Zoom (auto)", "My Meet room", "Studio classroom"
   url           TEXT,                  -- fixed rooms only
   passcode      TEXT,                  -- fixed rooms only, optional
   account_email TEXT,                  -- generated rooms: which account is connected
