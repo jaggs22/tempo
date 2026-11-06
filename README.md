@@ -70,7 +70,7 @@ npm run test:flow           # 14 end-to-end flows against the running dev server
    npx wrangler secret put VAPID_PRIVATE_KEY
    npx wrangler secret put VAPID_SUBJECT     # e.g. mailto:you@example.com
    ```
-4. **Automatic deploys (optional).** Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as GitHub repository secrets. Every push to `main` then runs the tests, applies migrations and deploys.
+4. **Automatic deploys.** Add `CLOUDFLARE_API_TOKEN` (and `GOOGLE_CLIENT_SECRET`) as GitHub repository secrets. The account ID is in `wrangler.toml`. Every push to `main` then runs the tests, applies migrations and deploys.
 
 ## Notes and limits
 

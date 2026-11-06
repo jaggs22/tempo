@@ -1,5 +1,6 @@
 name = "tempo"
 main = "src/worker.js"
+account_id = "5625d9434e0273b3eece8ac91b7909fd"
 compatibility_date = "2026-10-01"
 
 [assets]
