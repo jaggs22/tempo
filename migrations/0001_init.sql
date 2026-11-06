@@ -69,7 +69,7 @@ CREATE TABLE learner_rules (
   fee_minor           INTEGER NOT NULL DEFAULT 0,
   fee_basis           TEXT NOT NULL DEFAULT 'per_class' CHECK (fee_basis IN ('per_class','per_30min')),
   group_eligible      INTEGER NOT NULL DEFAULT 0,
-  can_reschedule      INTEGER NOT NULL DEFAULT 1,    -- may move classes Aparna scheduled
+  can_reschedule      INTEGER NOT NULL DEFAULT 1,    -- may move classes the teacher scheduled
   can_book_extra      INTEGER NOT NULL DEFAULT 1,    -- may book extra classes (charged as normal)
   can_book_makeup     INTEGER NOT NULL DEFAULT 1,    -- may redeem make-up credits
   allowed_modes       TEXT NOT NULL DEFAULT 'physical,virtual',  -- which class modes this learner may book
@@ -148,7 +148,7 @@ CREATE TABLE bookings (
 CREATE INDEX bookings_studio_time ON bookings(studio_id, starts_at);
 CREATE INDEX bookings_learner ON bookings(learner_id, starts_at);
 
--- Aparna's timetable: recurring classes she schedules for each learner.
+-- The teacher's timetable: recurring classes they schedule for each learner.
 -- Tempo generates individual bookings from these a few weeks ahead.
 CREATE TABLE class_series (
   id            TEXT PRIMARY KEY,
@@ -166,7 +166,7 @@ CREATE TABLE class_series (
   created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
 
--- Make-up credits: issued when Aparna cancels, or when a student cancels within policy.
+-- Make-up credits: issued when the teacher cancels, or when a student cancels within policy.
 CREATE TABLE makeup_credits (
   id             TEXT PRIMARY KEY,
   studio_id      TEXT NOT NULL REFERENCES studios(id),
